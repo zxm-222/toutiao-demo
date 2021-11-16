@@ -79,6 +79,15 @@
         <!--        文章内容-->
         <div class="article-content markdown-body" v-html="article.content" ref="article-content"></div>
         <van-divider>正文结束</van-divider>
+
+        <!--  底部区域-->
+        <div class="article-bottom">
+          <van-button class="comment-btn" type="default" round size="small">写评论</van-button>
+          <van-icon class="comment-icon" name="comment-o badge=123"/>
+          <collect-article class="btn-item" v-model="article.is_collected" :article-id="article.art_id"/>
+          <like-article class="btn-item" v-model="article.attitude" :article-id="article.art_id"/>
+          <van-icon name="share" color="#777"></van-icon>
+        </div>
       </div>
       <!--    加载失败404-->
       <div v-else-if="errStatus === 404" class="error-wrap">
@@ -93,15 +102,6 @@
         <van-button class="retry-btn" @click="loadArticle">点击重试</van-button>
       </div>
     </div>
-
-    <!--  底部区域-->
-    <div class="article-bottom">
-      <van-button class="comment-btn" type="default" round size="small">写评论</van-button>
-      <van-icon class="comment-icon" name="comment-o badge=123"/>
-      <van-button class="btn-item" icon="star-o"/>
-      <van-button class="btn-item" icon="good-job-o"/>
-      <van-icon name="share" color="#777"></van-icon>
-    </div>
   </div>
 </template>
 
@@ -110,12 +110,16 @@ import { getArticleById } from '@/api/article'
 import { ImagePreview } from 'vant'
 // import { addFollow, deleteFollow } from '@/api/user'
 import FollowUser from '@/components/follow-user'
+import CollectArticle from '@/components/collect-article'
+import LikeArticle from '@/components/like-article'
 export default {
   // 组件名称
   name: 'ArticleIndex',
   // 局部注册的组件
   components: {
-    FollowUser
+    FollowUser,
+    CollectArticle,
+    LikeArticle
   },
   // 组件参数 接收来自父组件的数据
   props: {
