@@ -1,10 +1,7 @@
 <template>
   <div>
+<!--    路由的出口-->
     <router-view />
-    <h1>黑马头条</h1>
-    <div>
-      <i class="iconfont icon-dianzan"></i>
-    </div>
   </div>
 </template>
 
@@ -15,5 +12,4 @@ export default {
 </script>
 
 <style scoped lang="less">
-
 </style>
