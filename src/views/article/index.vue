@@ -79,15 +79,27 @@
         <!--        文章内容-->
         <div class="article-content markdown-body" v-html="article.content" ref="article-content"></div>
         <van-divider>正文结束</van-divider>
-
+<!--        文章评论列表-->
+        <comment-list :list="commentList" :source="article.art_id" @onload-success="totalCommentCount=$event.total_count" @reply-click="onReplyClick"/>
         <!--  底部区域-->
         <div class="article-bottom">
-          <van-button class="comment-btn" type="default" round size="small">写评论</van-button>
-          <van-icon class="comment-icon" name="comment-o badge=123"/>
+          <van-button class="comment-btn" type="default" round size="small" @click="isPostShow=true">写评论</van-button>
+          <van-icon
+              class="comment-icon"
+              name="comment-o"
+              :badge="totalCommentCount"
+          />
           <collect-article class="btn-item" v-model="article.is_collected" :article-id="article.art_id"/>
           <like-article class="btn-item" v-model="article.attitude" :article-id="article.art_id"/>
           <van-icon name="share" color="#777"></van-icon>
         </div>
+<!--        发布评论-->
+        <van-popup
+          v-model="isPostShow"
+          position="bottom"
+        >
+          <comment-post :target="article.art_id" @post-success="onPostSuccess"/>
+        </van-popup>
       </div>
       <!--    加载失败404-->
       <div v-else-if="errStatus === 404" class="error-wrap">
@@ -102,6 +114,15 @@
         <van-button class="retry-btn" @click="loadArticle">点击重试</van-button>
       </div>
     </div>
+<!--    评论回复-->
+    <van-popup
+      v-model="isReplyShow"
+      position="bottom"
+      style="height: 100%;"
+      get-container="body"
+    >
+      <comment-reply :comment="currentComment" @close="isReplyShow=false" v-if="isReplyShow"/>
+    </van-popup>
   </div>
 </template>
 
@@ -112,14 +133,28 @@ import { ImagePreview } from 'vant'
 import FollowUser from '@/components/follow-user'
 import CollectArticle from '@/components/collect-article'
 import LikeArticle from '@/components/like-article'
+import CommentList from './components/comment-list'
+import CommentPost from './components/comment-post'
+import CommentReply from '@/views/article/components/comment-reply'
 export default {
   // 组件名称
   name: 'ArticleIndex',
   // 局部注册的组件
   components: {
+    CommentReply,
     FollowUser,
     CollectArticle,
-    LikeArticle
+    LikeArticle,
+    CommentList,
+    CommentPost
+  },
+  // 给所有的后代组件提供数据
+  // 然后在任何后代组件里，我们都可以使用 inject 选项来接收指定的我们想要添加在这个实例上的属性
+  // 不要滥用
+  provide: function () {
+    return {
+      articleId: this.articleId
+    }
   },
   // 组件参数 接收来自父组件的数据
   props: {
@@ -134,7 +169,12 @@ export default {
       article: {}, // 文章详情
       loading: true, // 加载中的loading状态
       errStatus: 0, // 失败的状态码
-      followLoading: false
+      followLoading: false,
+      totalCommentCount: 0,
+      isPostShow: false,
+      commentList: [],
+      isReplyShow: false,
+      currentComment: {} // 点击回复的评论对象
     }
   },
   // 计算属性
@@ -199,6 +239,19 @@ export default {
           })
         }
       })
+    },
+    onPostSuccess (data) {
+      // 关闭弹出层
+      this.isPostShow = false
+      // 将最新发布显示到列表顶部
+      this.commentList.unshift(data.new_obj)
+    },
+    onReplyClick (comment) {
+      // console.log(comment)
+      // 将子组件中传回的评论对象存储到当前组件
+      this.currentComment = comment
+      // 显示评论回复弹出层、
+      this.isReplyShow = true
     }
   }
 }
